@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>CONVERSATION: {{ data['thread_id'] }}</h1>
+    <h2>Files:</h2>
+    {% for file in data['files'] %}
+        <p>{{ file }}</p>
+    {% endfor %}
+
+    <h2>Messages:</h2>
+    {% for msg in data['messages'] %}
+        <p>{{ msg.role, msg.content }}</p>
+    {% endfor %}
+
+    <form method=post enctype=multipart/form-data>
+        <input type=text name=message style="width: 300px; height: 40px; padding: 5px;">
+        <input type=submit value='Submit'>
+    </form>
+</body>
+</html>

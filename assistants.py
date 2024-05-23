@@ -6,17 +6,6 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def list_assistant_ids():
-    return client.beta.assistants.list()
-
-def create_assistant(name):
-    return client.beta.assistants.create(
-        name=name,
-        instructions="You are an AI file assistant. Answer user queries based on the files provided.",
-        tools=[{"type": "file_search"}],
-        model="gpt-3.5-turbo"
-    )
-
 def retrieve_assistant(id):
     return client.beta.assistants.retrieve(id)
 

@@ -1,11 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocumentAI</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../static/style.css">
+  <title>DocumentAI</title>
 </head>
 <body>
-    <h1>DocumentAI</h1>
+  <h1>DocumentAI</h1>
+  <h2>Available Assistants:</h2>
+  {% for assistant in data['assistants'] %}
+    <p>{{ assistant.name, assistant.id }}</p>
+  {% endfor %}
+
+  <h2 style="padding-top: 5%;">Vector Stores:</h2>
+  {% for vstore in data['vector_stores'] %}
+    <div class="vstore-container">
+      <p>{{ vstore.name, vstore.id }}</p>
+      <a href="/upld?vstore_id={{ vstore.id }}">
+        <button class="vstore-files-button">Files</button>
+      </a>
+    </div>
+  {% endfor %}
+
+  <h2 style="padding-top: 5%;">Conversations:</h2>
+  <form method=post enctype=multipart/form-data>
+    <input type=submit value='Start New Conversation'>
+  </form>
+
 </body>
 </html>
