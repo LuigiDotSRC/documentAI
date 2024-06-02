@@ -1,4 +1,4 @@
-from flask import Flask, render_template, flash, request, redirect, url_for
+from flask import Flask, render_template, flash, request, redirect, url_for, CORS
 from werkzeug.utils import secure_filename
 from openai import OpenAI
 from dotenv import load_dotenv
