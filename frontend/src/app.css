@@ -4,4 +4,13 @@
 
 * {
     font-family: "Inter", "Arial";
+    color: white;
+}
+
+html, body {
+    height: 100%;
+}
+
+main {
+    height: 100%;
 }
