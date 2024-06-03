@@ -1,4 +1,5 @@
-from flask import Flask, render_template, flash, request, redirect, url_for, CORS
+from flask import Flask, render_template, flash, request, redirect, url_for, jsonify
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -10,14 +11,37 @@ ALLOWED_EXTENSIONS = {'txt','pdf','docx','md'}
 load_dotenv()
 
 app = Flask(__name__) 
-
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+CORS(app, origins=["http://localhost:5173"])
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+@app.route('/api/vector_stores/', methods=['GET'])
+def vector_stores_api():
+    if request.method == 'GET':
+        call = client.beta.vector_stores.list().data
+    
+        response = []
+        for v_store in call:
+            response.append(
+                {
+                    'id': v_store.id,
+                    'name': v_store.name,
+                    'num_files': v_store.file_counts.completed,
+                    'bytes': v_store.usage_bytes
+                }
+            )
+        return jsonify(response)
+    
+
+
+# TODO: REFACTOR API ROUTES BELLOW FOR PROPER INTERACTION WITH FRONTEND
+# TODO: REMOVE FLASK TEMPLATES (NO LONGER NEEDED W/ SVELTE FRONTEND)
 
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
