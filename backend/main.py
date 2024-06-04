@@ -36,12 +36,20 @@ def vector_stores_api():
     
     if request.method == 'POST':
         name = request.args.get('name')
+
+        if not name: 
+            return jsonify({
+                'status': 'error',
+                'message': 'Vector store name required'
+            }), 400
+
         client.beta.vector_stores.create(
             name=name
         )
         return jsonify({
-            'message': 'Success!'
-        })
+            'status': 'success',
+            'message': 'Successfully created vector store'
+        }), 200
         
 
 

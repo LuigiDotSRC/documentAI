@@ -14,13 +14,13 @@
     async function create_vector_store() {
         await fetch(`http://127.0.0.1:5000/api/vector_stores?name=${vstore_name}`, {
             method: 'POST', 
-        }).then(function(response) {
+        }).then(async function(response) {
             if (!response.ok) {
-                //TODO: Fetch error message from the API response body
-                toast.error(`ERROR ${response.status}: This did not work!`)
-            }
-            else {
-                toast.success("Successfully created vector store!")
+                const errorData = await response.json();
+                const errorMessage = errorData.message;
+                toast.error(`Error: ${errorMessage}`);
+            } else {
+                toast.success("Successfully created vector store!");
             }
         });
         await fetchVectorStores();
