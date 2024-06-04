@@ -12,11 +12,12 @@ load_dotenv()
 
 app = Flask(__name__) 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-CORS(app, origins=["http://localhost:5173"])
+# CORS(app, origins=["http://localhost:5173"])
+CORS(app, origins='*')
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-@app.route('/api/vector_stores/', methods=['GET'])
+@app.route('/api/vector_stores/', methods=['GET', 'POST'])
 def vector_stores_api():
     if request.method == 'GET':
         call = client.beta.vector_stores.list().data
@@ -33,9 +34,18 @@ def vector_stores_api():
             )
         return jsonify(response)
     
+    if request.method == 'POST':
+        name = request.args.get('name')
+        client.beta.vector_stores.create(
+            name=name
+        )
+        return jsonify({
+            'message': 'Success!'
+        })
+        
 
 
-# TODO: REFACTOR API ROUTES BELLOW FOR PROPER INTERACTION WITH FRONTEND
+# TODO: REFACTOR API ROUTES BELOW FOR PROPER INTERACTION WITH FRONTEND
 # TODO: REMOVE FLASK TEMPLATES (NO LONGER NEEDED W/ SVELTE FRONTEND)
 
 def allowed_file(filename):
