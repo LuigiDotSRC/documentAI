@@ -2,18 +2,26 @@
     import Navbar from "../../components/navbar.svelte";
     import VectorStoreCard from "../../components/vector_store_card.svelte";
     import {onMount} from 'svelte';
+    import toast, { Toaster } from 'svelte-french-toast';
 
     let vector_store_data = [];
     let vstore_name = ''; 
-
 
     onMount(async () => {
         await fetchVectorStores(); 
     });
 
     async function create_vector_store() {
-        const response = await fetch(`http://127.0.0.1:5000/api/vector_stores?name=${vstore_name}`, {
+        await fetch(`http://127.0.0.1:5000/api/vector_stores?name=${vstore_name}`, {
             method: 'POST', 
+        }).then(function(response) {
+            if (!response.ok) {
+                //TODO: Fetch error message from the API response body
+                toast.error(`ERROR ${response.status}: This did not work!`)
+            }
+            else {
+                toast.success("Successfully created vector store!")
+            }
         });
         await fetchVectorStores();
     }
@@ -23,6 +31,8 @@
         vector_store_data = await response.json();
     }
 </script>
+
+<Toaster />
 
 <main class="bg-neutral-700">
     <Navbar />
