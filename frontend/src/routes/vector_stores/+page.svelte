@@ -12,7 +12,7 @@
     });
 
     async function create_vector_store() {
-        await fetch(`http://127.0.0.1:5000/api/vector_stores?name=${vstore_name}`, {
+        await fetch(`http://127.0.0.1:5000/api/vector_stores/?name=${vstore_name}`, {
             method: 'POST', 
         }).then(async function(response) {
             if (!response.ok) {
@@ -23,12 +23,34 @@
                 toast.success("Successfully created vector store!");
             }
         });
+        vstore_name = '';
         await fetchVectorStores();
     }
 
     async function fetchVectorStores() {
         const response = await fetch('http://127.0.0.1:5000/api/vector_stores', {method: 'GET'});
         vector_store_data = await response.json();
+    }
+
+    async function remove_vector_store(vstore_id) {
+        toast('Working...', {
+	        icon: '⏳',
+        });
+        await fetch(`http://127.0.0.1:5000/api/vector_stores/?id=${vstore_id}`, {
+            method: 'DELETE', 
+            headers: {
+                'content-type': 'application/json'
+            }
+        }).then(async function(response) {
+            if (!response.ok) {
+                const errorData = await response.json();
+                const errorMessage = errorData.message;
+                toast.error(`Error: ${errorMessage}`);
+            } else {
+                toast.success("Successfully deleted vector store!");
+            }
+        });
+        await fetchVectorStores();
     }
 </script>
 
@@ -56,6 +78,9 @@
                 vector_store_ID={v_store.id}
                 num_files={v_store.num_files}
                 bytes={v_store.bytes}
+
+                on_edit_click={() => {}}
+                on_delete_click={() => remove_vector_store(v_store.id)}
             />
             {/each}
         {:catch error}

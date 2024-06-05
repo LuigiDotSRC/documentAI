@@ -12,12 +12,11 @@ load_dotenv()
 
 app = Flask(__name__) 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# CORS(app, origins=["http://localhost:5173"])
-CORS(app, origins='*')
+CORS(app, origins=["http://localhost:5173"], methods=['GET', 'POST', 'DELETE'])
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-@app.route('/api/vector_stores/', methods=['GET', 'POST'])
+@app.route('/api/vector_stores/', methods=['GET', 'POST', 'DELETE'])
 def vector_stores_api():
     if request.method == 'GET':
         call = client.beta.vector_stores.list().data
@@ -50,7 +49,21 @@ def vector_stores_api():
             'status': 'success',
             'message': 'Successfully created vector store'
         }), 200
+    
+    if request.method == 'DELETE':
+        id = request.args.get('id')
         
+        if not id:
+            return jsonify({
+                'status': 'error',
+                'message': 'Vector store ID required'
+            }), 400
+        
+        client.beta.vector_stores.delete(id)
+        return jsonify({
+            'status': 'success',
+            'message': 'Successfully deleted vector store'
+        }), 200
 
 
 # TODO: REFACTOR API ROUTES BELOW FOR PROPER INTERACTION WITH FRONTEND
