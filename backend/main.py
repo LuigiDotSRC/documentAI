@@ -19,8 +19,19 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 @app.route('/api/vector_stores/', methods=['GET', 'POST', 'DELETE'])
 def vector_stores_api():
     if request.method == 'GET':
+        id = request.args.get('id')
+
+        if id:
+            v_store = client.beta.vector_stores.retrieve(vector_store_id=id)
+            files = client.beta.vector_stores.files.list(vector_store_id=id)
+
+            return jsonify({
+                'name': v_store.name,
+                'files': [{'id': file.id, 'bytes': file.usage_bytes} for file in files]
+            })
+            
+
         call = client.beta.vector_stores.list().data
-    
         response = []
         for v_store in call:
             response.append(
@@ -199,5 +210,3 @@ if __name__ == '__main__':
         )
 
     app.run(host='0.0.0.0', debug=True)
-
-

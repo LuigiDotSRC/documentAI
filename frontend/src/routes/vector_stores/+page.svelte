@@ -78,8 +78,6 @@
                 vector_store_ID={v_store.id}
                 num_files={v_store.num_files}
                 bytes={v_store.bytes}
-
-                on_edit_click={() => {}}
                 on_delete_click={() => remove_vector_store(v_store.id)}
             />
             {/each}
