@@ -16,6 +16,11 @@ CORS(app, origins=["http://localhost:5173"], methods=['GET', 'POST', 'DELETE'])
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 @app.route('/api/vector_stores/', methods=['GET', 'POST', 'DELETE'])
 def vector_stores_api():
     if request.method == 'GET':
@@ -76,14 +81,56 @@ def vector_stores_api():
             'message': 'Successfully deleted vector store'
         }), 200
 
+@app.route('/api/files/', methods=['POST'])
+def files_api():
+    if 'file' not in request.files:
+        return jsonify({
+            'status': 'error',
+            'message': 'File not recieved'
+        }), 400 
+    
+    file = request.files['file']
+
+    if file.filename == '': 
+        return jsonify({
+            'status': 'error',
+            'message': 'Bad file name'
+        }), 400 
+    
+    if not allowed_file(file.filename):
+        return jsonify({
+            'status': 'error',
+            'message': 'Bad file type'
+        }), 400 
+
+    filename = secure_filename(file.filename)
+    upload_folder = app.config['UPLOAD_FOLDER']
+    file_path = os.path.join(upload_folder, filename)
+    file.save(file_path)
+
+    try:
+        with open(file_path, "rb") as file_stream:
+            openai_file = [file_stream]
+            file_batch = client.beta.vector_stores.file_batches.upload_and_poll(
+                vector_store_id=request.form.get('vstore_id'),
+                files=openai_file
+            )
+
+        return jsonify({
+            'status': 'success',
+            'message': 'File uploaded successfully'
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'{str(e)}'
+        }), 200
+    finally:
+        os.remove(file_path)
+        file.close()
 
 # TODO: REFACTOR API ROUTES BELOW FOR PROPER INTERACTION WITH FRONTEND
 # TODO: REMOVE FLASK TEMPLATES (NO LONGER NEEDED W/ SVELTE FRONTEND)
-
-def allowed_file(filename):
-    return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -201,6 +248,9 @@ def conversation():
     )
 
 if __name__ == '__main__':
+    if not os.path.exists(UPLOAD_FOLDER):
+        os.makedirs(UPLOAD_FOLDER)
+
     if len(client.beta.assistants.list().data) < 1:
         client.beta.assistants.create(
             name="DocAI Reader",
