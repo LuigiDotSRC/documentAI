@@ -81,53 +81,70 @@ def vector_stores_api():
             'message': 'Successfully deleted vector store'
         }), 200
 
-@app.route('/api/files/', methods=['POST'])
+@app.route('/api/files/', methods=['GET', 'POST'])
 def files_api():
-    if 'file' not in request.files:
-        return jsonify({
-            'status': 'error',
-            'message': 'File not recieved'
-        }), 400 
-    
-    file = request.files['file']
+    if request.method == 'GET':
+        id = request.args.get('id')
+        if not id:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to retrieve file ID'
+            }), 401
 
-    if file.filename == '': 
+        file = client.files.retrieve(id)
         return jsonify({
-            'status': 'error',
-            'message': 'Bad file name'
-        }), 400 
-    
-    if not allowed_file(file.filename):
-        return jsonify({
-            'status': 'error',
-            'message': 'Bad file type'
-        }), 400 
-
-    filename = secure_filename(file.filename)
-    upload_folder = app.config['UPLOAD_FOLDER']
-    file_path = os.path.join(upload_folder, filename)
-    file.save(file_path)
-
-    try:
-        with open(file_path, "rb") as file_stream:
-            openai_file = [file_stream]
-            file_batch = client.beta.vector_stores.file_batches.upload_and_poll(
-                vector_store_id=request.form.get('vstore_id'),
-                files=openai_file
-            )
-
-        return jsonify({
-            'status': 'success',
-            'message': 'File uploaded successfully'
+            'id': file.id,
+            'filename': file.filename,
+            'bytes': file.bytes,
+            'created_at': file.created_at,
         }), 200
-    except Exception as e:
-        return jsonify({
-            'status': 'error',
-            'message': f'{str(e)}'
-        }), 200
-    finally:
-        os.remove(file_path)
-        file.close()
+
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return jsonify({
+                'status': 'error',
+                'message': 'File not recieved'
+            }), 400 
+        
+        file = request.files['file']
+
+        if file.filename == '': 
+            return jsonify({
+                'status': 'error',
+                'message': 'Bad file name'
+            }), 400 
+        
+        if not allowed_file(file.filename):
+            return jsonify({
+                'status': 'error',
+                'message': 'Bad file type'
+            }), 400 
+
+        filename = secure_filename(file.filename)
+        upload_folder = app.config['UPLOAD_FOLDER']
+        file_path = os.path.join(upload_folder, filename)
+        file.save(file_path)
+
+        try:
+            with open(file_path, "rb") as file_stream:
+                openai_file = [file_stream]
+                file_batch = client.beta.vector_stores.file_batches.upload_and_poll(
+                    vector_store_id=request.form.get('vstore_id'),
+                    files=openai_file
+                )
+
+            return jsonify({
+                'status': 'success',
+                'message': 'File uploaded successfully'
+            }), 200
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'message': f'{str(e)}'
+            }), 200
+        finally:
+            os.remove(file_path)
+            file.close()
 
 # TODO: REFACTOR API ROUTES BELOW FOR PROPER INTERACTION WITH FRONTEND
 # TODO: REMOVE FLASK TEMPLATES (NO LONGER NEEDED W/ SVELTE FRONTEND)

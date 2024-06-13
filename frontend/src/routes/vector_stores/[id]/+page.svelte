@@ -3,6 +3,9 @@
     import { onMount } from 'svelte';
 
     import { page } from '$app/stores';
+    import uploadIcon from '$lib/upload_icon.png'
+    import FileCard from '../../../components/fileCard.svelte';
+
     const id = $page.params.id;
 
     let name = '';
@@ -52,6 +55,25 @@
     }
 </script>
 
+<style>
+    #fileInput {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .truncate {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 400px; 
+    }
+</style>
+
 <main>
     <Navbar />
     <div class="ml-10 my-2">
@@ -66,21 +88,37 @@
             {/await}
         </h1>
     </div>
-
-    <div>
-        <input id="fileInput" type="file" on:change={handleFileInputChange} />
-        <button on:click={uploadFile}>Upload</button>
+    
+    <div class="mt-10 mb-5 ml-10 w-[600px] h-[150px]"> 
+        <div class="bg-neutral-800 w-full h-full my-2 rounded-lg relative">
+            <h2 class="text-3xl text-center">Upload a file</h2>
+            <img id="colorized-image" src="{uploadIcon}" alt="Upload Icon" class="w-20 mx-auto">
+            <p class="text-center">Click here or drag and drop</p>
+            <input id="fileInput" type="file" on:change={handleFileInputChange} />
+        </div>
     </div>
 
-    {#await name}
-        Loading...
-    {:then}
-        {#each files as file}
-            <p>{file}</p>
-        {/each}
-    {:catch error}
-        Error: {error.message}
-    {/await}
-    
+    <div class="flex ml-10 align-middle">
+        {#if selectedFile}
+            <p class="text-lg my-auto truncate">Selected file: {selectedFile.name}</p>
+        {:else}
+            <p class="text-lg my-auto">No selected file</p>
+        {/if}
+        <button on:click={uploadFile} class="ml-10 px-2 py-2 border-2 rounded-lg bg-green-500 hover:bg-green-400">Upload File</button>
+    </div>
+
+    <div class="my-10 ml-10">
+        <h2 class="text-3xl">Files</h2>
+        {#await files}
+            Loading...
+        {:then}
+            {#each files as file}
+                <FileCard file_id={file.id}/>
+            {/each}
+        {:catch error}
+            Error: {error.message}
+        {/await}
+
+    </div>
 </main>
 

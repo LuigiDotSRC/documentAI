@@ -14,3 +14,7 @@ html, body {
 main {
     height: 100%;
 }
+
+#colorized-image {
+    filter: invert(100%) grayscale(100%);
+}
