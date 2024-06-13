@@ -5,6 +5,7 @@
     import { page } from '$app/stores';
     import uploadIcon from '$lib/upload_icon.png'
     import FileCard from '../../../components/fileCard.svelte';
+    import toast, { Toaster } from 'svelte-french-toast';
 
     const id = $page.params.id;
 
@@ -19,8 +20,16 @@
     async function fetchVectorStoreData() {
         const response = await fetch(`http://127.0.0.1:5000/api/vector_stores?id=${id}`);
         const response_json = await response.json();
-        name = response_json.name;
-        files = response_json.files;  
+        name = response_json.name;  
+
+        let filePromises = response_json.files.map(async file => {
+            const fileResponse = await fetch(`http://127.0.0.1:5000/api/files/?id=${file.id}`, { method: 'GET' });
+            if (fileResponse.ok) {
+                return fileResponse.json();
+            }
+        });
+        let fileDataArray = await Promise.all(filePromises);
+        files = fileDataArray.filter(fileData => fileData !== undefined);
     }
 
     function handleFileInputChange(event) {
@@ -30,7 +39,9 @@
 
     async function uploadFile() {
         if (selectedFile) {
-            console.log("Uploading file:", selectedFile);
+            toast('Working...', {
+	            icon: '⏳',
+            });
 
             const formData = new FormData();
             formData.append('file', selectedFile);
@@ -43,16 +54,30 @@
 
             if (response.ok) {
                 const data = await response.json();
-                console.log(data);
+                toast.success('Successfully uploaded file!');
+                fetchVectorStoreData();
             } else {
-                console.log('error')
+                toast.error(response.message); 
             }
         } else {
-            console.log("No file selected.")
+            toast.error('Must select a file');
         }
 
         document.getElementById('fileInput').value = '';
     }
+
+    async function deleteFile(id) {
+        toast('Working...', {
+	        icon: '⏳',
+        });
+        const response = await fetch(`http://127.0.0.1:5000/api/files/?id=${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            toast.success('Deleted file! Refresh the page');
+        } else {
+            toast.error(response.message); 
+        }
+    }
+
 </script>
 
 <style>
@@ -73,6 +98,8 @@
     max-width: 400px; 
     }
 </style>
+
+<Toaster /> 
 
 <main>
     <Navbar />
@@ -113,7 +140,13 @@
             Loading...
         {:then}
             {#each files as file}
-                <FileCard file_id={file.id}/>
+                <FileCard 
+                    file_id={file.id}
+                    file_name={file.filename}
+                    upload_time={file.created_at}
+                    bytes={file.bytes}
+                    on_delete={deleteFile}
+                />
             {/each}
         {:catch error}
             Error: {error.message}

@@ -6,4 +6,5 @@ lib64/
 pyvenv.cfg
 
 .env
-uploads/*
+
+backend/uploads

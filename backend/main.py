@@ -81,7 +81,7 @@ def vector_stores_api():
             'message': 'Successfully deleted vector store'
         }), 200
 
-@app.route('/api/files/', methods=['GET', 'POST'])
+@app.route('/api/files/', methods=['GET', 'POST', 'DELETE'])
 def files_api():
     if request.method == 'GET':
         id = request.args.get('id')
@@ -145,6 +145,20 @@ def files_api():
         finally:
             os.remove(file_path)
             file.close()
+
+    if request.method == 'DELETE':
+        id = request.args.get('id')
+        if not id:
+            return jsonify({
+                'status': 'error',
+                'message': 'Failed to retrieve file ID'
+            }), 401
+
+        file = client.files.delete(id)
+        return jsonify({
+            'status': 'success',
+            'message': 'Successfully deleted file'
+        }), 200
 
 # TODO: REFACTOR API ROUTES BELOW FOR PROPER INTERACTION WITH FRONTEND
 # TODO: REMOVE FLASK TEMPLATES (NO LONGER NEEDED W/ SVELTE FRONTEND)
