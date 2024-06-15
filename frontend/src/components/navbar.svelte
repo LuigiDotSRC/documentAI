@@ -7,6 +7,6 @@
 
     <div class="flex items-center">
         <a href="/vector_stores" class="text-xl text-white mx-2.5 hover:text-blue-400 hover:underline">Vector Stores</a>
-        <a href="/" class="text-xl text-white mx-2.5 hover:text-blue-400 hover:underline">Conversations</a>
+        <a href="/conversations " class="text-xl text-white mx-2.5 hover:text-blue-400 hover:underline">Conversations</a>
     </div>
 </div>
