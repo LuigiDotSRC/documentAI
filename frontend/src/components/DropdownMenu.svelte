@@ -3,18 +3,22 @@
 
     let dropdown;
     let hidden = true;
+    let vector_store_data = [];
+    let target_vstore_id = ''; 
 
     function toggleVisibility() {
         dropdown.classList.toggle('hidden');
         hidden = !hidden;
     }
 
-    onMount(() => {
+    onMount(async () => {
         dropdown = document.getElementById('dropdown-options');
         document.getElementById('menu-button').addEventListener('click', toggleVisibility);
 
         // Close the dropdown when clicking outside of it
         document.addEventListener('click', clickOutsideHandler);
+
+        await fetchVectorStores();
 
         return () => {
             document.removeEventListener('click', clickOutsideHandler);
@@ -29,6 +33,21 @@
             hidden = true;
         }
     }
+
+    async function fetchVectorStores() {
+        const response = await fetch('http://127.0.0.1:5000/api/vector_stores', {method: 'GET'});
+        vector_store_data = await response.json();
+    }
+
+    function setTargetVectorStore(id, name) {
+        if (target_vstore_id) {
+            document.getElementById(`button-${target_vstore_id}`).classList.remove('bg-blue-200');
+        }
+        target_vstore_id = id; 
+        document.getElementById(`button-${id}`).classList.add('bg-blue-200');
+        document.getElementById('menu-button').textContent = name; 
+    }
+
 </script>
 
 <div class="relative inline-block text-left mx-2">
@@ -41,15 +60,18 @@
       </button>
     </div>
 
-    <div id="dropdown-options" class="hidden absolute z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-      <div class="py-1" role="none">
-        <!-- Active: "bg-gray-100 text-gray-900", Not Active: "text-gray-700" -->
-        <a href="/" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-0">Account settings</a>
-        <a href="/" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-1">Support</a>
-        <a href="/" class="block px-4 py-2 text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-2">License</a>
-        <form method="POST" action="#" role="none">
-          <button type="submit" class="block w-full px-4 py-2 text-left text-sm text-gray-700" role="menuitem" tabindex="-1" id="menu-item-3">Sign out</button>
-        </form>
+    <div id="dropdown-options" class="hidden absolute pr-16 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+      <div class="py-1 pr-20" role="none">
+
+        {#await vector_store_data}
+            Loading...
+        {:then data}
+            {#each data as v_store}
+                <button class="block px-2 py-2 text-sm text-gray-700 hover:bg-blue-100" role="menuitem" on:click={setTargetVectorStore(v_store.id, v_store.name)} id={`button-${v_store.id}`}>{v_store.name} {v_store.id}</button>
+            {/each}
+        {:catch error}
+            Error: {error.message}
+        {/await}
       </div>
     </div>
   </div>
