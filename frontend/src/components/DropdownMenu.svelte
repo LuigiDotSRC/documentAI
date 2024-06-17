@@ -4,7 +4,7 @@
     let dropdown;
     let hidden = true;
     let vector_store_data = [];
-    let target_vstore_id = ''; 
+    export let target_vstore_id; 
 
     function toggleVisibility() {
         dropdown.classList.toggle('hidden');

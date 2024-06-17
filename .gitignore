@@ -8,3 +8,4 @@ pyvenv.cfg
 .env
 
 backend/uploads
+backend/threads.db
