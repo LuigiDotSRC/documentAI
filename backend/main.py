@@ -1,12 +1,14 @@
-from flask import Flask, render_template, flash, request, redirect, url_for, jsonify
+from flask import Flask, render_template, flash, request, redirect, url_for, jsonify, g
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from openai import OpenAI
 from dotenv import load_dotenv
+import sqlite3
 import os
 
 UPLOAD_FOLDER = 'uploads/'
 ALLOWED_EXTENSIONS = {'txt','pdf','docx','md'}
+DATABASE = 'threads.db'
 
 load_dotenv()
 
@@ -20,6 +22,17 @@ def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None: 
+        db = g._database = sqlite3.connect(DATABASE)
+    return db 
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close() 
 
 @app.route('/api/vector_stores/', methods=['GET', 'POST', 'DELETE'])
 def vector_stores_api():
@@ -160,6 +173,54 @@ def files_api():
             'message': 'Successfully deleted file'
         }), 200
 
+@app.route('/api/threads/', methods=['GET', 'POST'])
+def threads_api():
+    if request.method == 'POST':
+        name = request.args.get('name')
+        vstore_id = request.args.get('vstore_id')
+
+        thread = client.beta.threads.create()
+
+        db = get_db()
+        cur = db.cursor() 
+
+        try: 
+            cur.execute(f"""
+                INSERT INTO thread VALUES
+                    ('{thread.id}', '{name}', '{vstore_id}')
+            """)
+            db.commit() 
+            return "Thread created successfully", 200 
+        except Exception as e:
+            db.rollback() 
+            return str(e), 500 
+        finally:
+            cur.close() 
+    
+    if request.method == 'GET':
+        db = get_db()
+        cur = db.cursor() 
+
+        try: 
+            cur.execute("SELECT * FROM thread")
+            threads = cur.fetchall() 
+
+            threads_list = []
+            for thread in threads:
+                thread_dict = {
+                    'id': thread[0],
+                    'name': thread[1],
+                    'vstore_id': thread[2]
+                }
+                threads_list.append(thread_dict)
+
+            return jsonify(threads_list), 200
+        except Exception as e:
+            db.rollback() 
+            return str(e), 500 
+        finally:
+            cur.close()
+
 # TODO: REFACTOR API ROUTES BELOW FOR PROPER INTERACTION WITH FRONTEND
 # TODO: REMOVE FLASK TEMPLATES (NO LONGER NEEDED W/ SVELTE FRONTEND)
 
@@ -290,4 +351,14 @@ if __name__ == '__main__':
             model="gpt-3.5-turbo"
         )
 
+    try:
+        con = sqlite3.connect(DATABASE)
+        cur = con.cursor()
+        cur.execute("CREATE TABLE thread(id, name, vstore_id)")
+    except Exception as e:
+        print(e)
+    finally:
+        cur.close()
+        con.close()
+    
     app.run(host='0.0.0.0', debug=True)
