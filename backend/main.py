@@ -173,7 +173,7 @@ def files_api():
             'message': 'Successfully deleted file'
         }), 200
 
-@app.route('/api/threads/', methods=['GET', 'POST'])
+@app.route('/api/threads/', methods=['GET', 'POST', 'DELETE'])
 def threads_api():
     if request.method == 'POST':
         name = request.args.get('name')
@@ -215,6 +215,21 @@ def threads_api():
                 threads_list.append(thread_dict)
 
             return jsonify(threads_list), 200
+        except Exception as e:
+            db.rollback() 
+            return str(e), 500 
+        finally:
+            cur.close()
+
+    if request.method == 'DELETE':
+        id = request.args.get('id')
+        db = get_db()
+        cur = db.cursor() 
+
+        try:
+            cur.execute(f"DELETE FROM thread WHERE id = \"{id}\"")
+            db.commit()
+            return "Successfully deleted thread", 200 
         except Exception as e:
             db.rollback() 
             return str(e), 500 
