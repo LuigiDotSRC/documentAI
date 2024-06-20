@@ -252,6 +252,54 @@ def threads_api():
         finally:
             cur.close()
 
+@app.route('/api/messages/', methods=['GET', 'POST'])
+def messages_api():
+    if request.method == "POST":
+        thread_id = request.args.get("thread_id")
+        message = request.args.get("message")
+        file_ids = request.args.get("file_ids")
+
+        files = [] 
+        file_id = "" 
+        if file_ids:
+            for char in file_ids:
+                if char == ',':
+                    files.append(file_id)
+                    file_id = ""
+                else:
+                    file_id = file_id + char
+            files.append(file_id)
+
+        attached_files = [{'file_id': file_id, 'tools': [{'type': 'file_search'}]} for file_id in files]
+        client.beta.threads.messages.create(
+            thread_id,
+            role='user',
+            content=message,
+            attachments=attached_files
+        )
+
+        run = client.beta.threads.runs.create(
+            thread_id,
+            assistant_id=client.beta.assistants.list().data[0].id
+        )
+
+        while run.status != "completed":
+            run = client.beta.threads.runs.retrieve(
+                thread_id=thread_id,
+                run_id=run.id
+            )
+
+        return "Run successful", 200
+    
+    if request.method == "GET":
+        thread_id = thread_id = request.args.get("thread_id")
+        collector = []
+        for message in client.beta.threads.messages.list(thread_id).data:
+            collector.append({'role': message.role, 'message': message.content[0].text.value})
+        collector.reverse()
+        return collector, 200
+
+
 if __name__ == '__main__':
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
