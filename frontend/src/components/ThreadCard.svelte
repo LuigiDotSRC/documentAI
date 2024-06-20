@@ -13,7 +13,7 @@
         <p>Vector Store: {vstore_id}</p>
     </div>
     <div class="flex flex-col">
-        <a href='/vector_stores/{thread_ID}'>
+        <a href='/conversations/{thread_ID}'>
             <button class="border-2 bg-green-500 px-8 my-2 rounded-lg hover:bg-green-400 h-10">Chat</button>
         </a>
         <button on:click={on_delete_click} class="border-2 bg-red-500 px-2 my-2 rounded-lg hover:bg-red-400 h-10">Delete</button>

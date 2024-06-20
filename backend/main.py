@@ -201,25 +201,41 @@ def threads_api():
         db = get_db()
         cur = db.cursor() 
 
-        try: 
-            cur.execute("SELECT * FROM thread")
-            threads = cur.fetchall() 
+        if id := request.args.get("id"):
+            try:
+                cur.execute(f"SELECT * FROM thread WHERE id = \"{id}\"")
+                thread = cur.fetchone() 
+                return jsonify({
+                    "id": thread[0],
+                    "name": thread[1],
+                    "vstore_id": thread[2]
+                }), 200
+            except Exception as e:
+                db.rollback() 
+                return str(e), 500 
+            finally:
+                cur.close()
 
-            threads_list = []
-            for thread in threads:
-                thread_dict = {
-                    'id': thread[0],
-                    'name': thread[1],
-                    'vstore_id': thread[2]
-                }
-                threads_list.append(thread_dict)
+        else:
+            try: 
+                cur.execute("SELECT * FROM thread")
+                threads = cur.fetchall() 
 
-            return jsonify(threads_list), 200
-        except Exception as e:
-            db.rollback() 
-            return str(e), 500 
-        finally:
-            cur.close()
+                threads_list = []
+                for thread in threads:
+                    thread_dict = {
+                        'id': thread[0],
+                        'name': thread[1],
+                        'vstore_id': thread[2]
+                    }
+                    threads_list.append(thread_dict)
+
+                return jsonify(threads_list), 200
+            except Exception as e:
+                db.rollback() 
+                return str(e), 500 
+            finally:
+                cur.close()
 
     if request.method == 'DELETE':
         id = request.args.get('id')
