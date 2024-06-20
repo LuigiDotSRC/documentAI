@@ -187,7 +187,7 @@ def threads_api():
         try: 
             cur.execute(f"""
                 INSERT INTO thread VALUES
-                    ('{thread.id}', '{name}', '{vstore_id}')
+                    ("{thread.id}", "{name}", "{vstore_id}")
             """)
             db.commit() 
             return "Thread created successfully", 200 

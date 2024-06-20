@@ -10,9 +10,9 @@
         if (!vstore_id || !name) {
             toast.error("Name and Vector Store need to be specified"); 
         } else {
-            const response = await fetch('http://127.0.0.1:5000/api/threads/', {
+            console.log(name, vstore_id)
+            const response = await fetch(`http://127.0.0.1:5000/api/threads/?name=${name}&vstore_id=${vstore_id}`, {
                 method: 'POST',
-                body: JSON.stringify({name, vstore_id})
             });
 
             if (!response.ok) {

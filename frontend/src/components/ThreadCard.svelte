@@ -1,8 +1,7 @@
 <script>
     export let thread_name;
     export let thread_ID;
-    export let time_created;
-    export let num_messages;
+    export let vstore_id
     
     export let on_delete_click;
 </script>
@@ -11,8 +10,7 @@
     <div class="flex flex-col">
         <h3 class="text-xl">{thread_name}</h3>
         <p>ID: {thread_ID}</p>
-        <p>Time created: {time_created}</p>
-        <p>Number of messages: {num_messages}</p>
+        <p>Vector Store: {vstore_id}</p>
     </div>
     <div class="flex flex-col">
         <a href='/vector_stores/{thread_ID}'>
