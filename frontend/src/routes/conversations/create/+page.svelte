@@ -1,5 +1,5 @@
 <script>
-    import Navbar from "../../../components/navbar.svelte";
+    import Navbar from "../../../components/Navbar.svelte";
     import DropdownMenu from "../../../components/DropdownMenu.svelte";
     import toast, { Toaster } from 'svelte-french-toast';
 

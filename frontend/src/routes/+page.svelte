@@ -1,5 +1,5 @@
 <script>
-    import Navbar from "../components/navbar.svelte";
+    import Navbar from "../components/Navbar.svelte";
 </script>
 
 <main class="bg-neutral-700">

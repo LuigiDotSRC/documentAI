@@ -1,5 +1,5 @@
 <script>
-    import Navbar from '../../../components/navbar.svelte';
+    import Navbar from '../../../components/Navbar.svelte';
     import { page } from '$app/stores';
     import { onMount } from 'svelte';
     import sendIcon from '$lib/paper-plane.png';

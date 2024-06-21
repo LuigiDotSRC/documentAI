@@ -1,10 +1,10 @@
 <script>
-    import Navbar from '../../../components/navbar.svelte';
+    import Navbar from '../../../components/Navbar.svelte';
     import { onMount } from 'svelte';
 
     import { page } from '$app/stores';
     import uploadIcon from '$lib/upload_icon.png'
-    import FileCard from '../../../components/fileCard.svelte';
+    import FileCard from '../../../components/FileCard.svelte';
     import toast, { Toaster } from 'svelte-french-toast';
 
     const id = $page.params.id;
