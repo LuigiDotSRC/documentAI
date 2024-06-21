@@ -2,6 +2,8 @@
 
 A file assistant AI that supports file attachment for prompt enrichment. Built using Svelte, Flask, SQLite3, Tailwindcss, and OpenAI's API endpoints alongside its' GPT-3.5-Turbo model. 
 
+![Demo screenshot](./assets/demo%20.png)
+
 ## Setup
 1. Attain an OpenAI API key from https://platform.openai.com/api-keys
 2. Configure the .env file at the root of the project:
