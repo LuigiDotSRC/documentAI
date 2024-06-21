@@ -1,6 +1,6 @@
 <script>
     import Navbar from "../../components/Navbar.svelte";
-    import VectorStoreCard from "../../components/VectorStoreCard.svelte.svelte";
+    import VectorStoreCard from "../../components/VectorStoreCard.svelte";
     import {onMount} from 'svelte';
     import toast, { Toaster } from 'svelte-french-toast';
 
