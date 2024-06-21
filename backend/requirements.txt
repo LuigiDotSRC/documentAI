@@ -1,4 +1,5 @@
 flask
 openai
 python-dotenv
-requests
+flask_cors
+db-sqlite3
